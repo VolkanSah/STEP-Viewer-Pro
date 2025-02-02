@@ -8,6 +8,7 @@ AI-Contest Tool
 - Silver: ChatGPT 🥈
 - Bronze: DeepSeek 🥉
 
+---
 
 **STEP Viewer Pro** is a lightweight 3D model viewer designed to display STEP files (ISO 10303), with a focus on providing high-quality rendering of models for screenshots. This project was developed with the goal of enabling easy viewing and capturing of STEP files in customizable angles and resolutions, and it’s offered as a gift to the open-source community.
 
