@@ -1,200 +1,96 @@
-import sys
-import os
-import cadquery as cq
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, QFileDialog, QMessageBox
-from PyQt6.QtCore import Qt
-from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper, vtkRenderer
-import vtk
+# STEP Viewer Pro
 
-os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"  # HighDPI-Fix für Windows
+STEP Viewer Pro is a Python-based desktop application designed for visualizing STEP (STP) files, commonly used in 3D CAD modeling. This viewer utilizes the power of VTK (Visualization Toolkit) for rendering and CadQuery for importing STEP files. The application provides an interactive interface with basic functionality for loading STEP files, visualizing them in 3D, and saving screenshots of the rendered view.
 
-class STEPViewer(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.current_actor = None
-        self.init_ui()
-        
-    def init_ui(self):
-        """Initialisiert die Benutzeroberfläche"""
-        self.setWindowTitle("STEP Viewer Pro")
-        self.setGeometry(100, 100, 1024, 768)
+## Features
 
-        # VTK Widget
-        self.vtk_widget = QVTKRenderWindowInteractor(self)
-        self.renderer = vtkRenderer()
-        self.vtk_widget.GetRenderWindow().AddRenderer(self.renderer)
-        self.renderer.SetBackground(0.15, 0.15, 0.15)  # Dunkler Hintergrund
+- **Load and View STEP Files**: Open STEP files (.stp, .step) and display them in a 3D interactive viewer.
+- **3D Visualization**: Leverage VTK for rendering the 3D geometry with dynamic interactions.
+- **Screenshot Capture**: Save a screenshot of the rendered view to your local machine.
+- **Cross-Platform**: Works on systems supporting Python and Qt.
 
-        # Steuerungselemente
-        control_widget = QWidget()
-        layout = QVBoxLayout(control_widget)
-        
-        btn_load = QPushButton("STEP Datei öffnen")
-        btn_load.clicked.connect(self.load_step)
-        layout.addWidget(btn_load)
-        
-        btn_save = QPushButton("Screenshot speichern")
-        btn_save.clicked.connect(self.save_screenshot)
-        layout.addWidget(btn_save)
+## Requirements
 
-        # Haupt-Layout
-        central_widget = QWidget()
-        main_layout = QVBoxLayout(central_widget)
-        main_layout.addWidget(self.vtk_widget)
-        main_layout.addWidget(control_widget)
-        
-        self.setCentralWidget(central_widget)
+To run this project, the following Python modules must be installed:
 
-        # VTK initialisieren
-        self.vtk_widget.Initialize()
-        self.vtk_widget.Start()
+- `cadquery`: Used for importing and working with STEP files.
+- `PyQt6`: Provides the GUI components for the application.
+- `vtk`: The core library for 3D rendering.
+- `os`: Used for environment configuration.
+- `sys`: For system-specific parameters and functions.
 
-    def load_step(self):
-        """Lädt und zeigt eine STEP-Datei an"""
-        path, _ = QFileDialog.getOpenFileName(
-            self,
-            "STEP-Datei auswählen",
-            "",
-            "STEP Files (*.stp *.step);;Alle Dateien (*)"
-        )
-        
-        if not path:
-            return
+### Installation
 
-        try:
-            # Alte Darstellung entfernen
-            if self.current_actor:
-                self.renderer.RemoveActor(self.current_actor)
-                self.current_actor = None
+1. Ensure that you have Python 3.7 or higher installed. You can download it from [here](https://www.python.org/downloads/).
+   
+2. Install the necessary dependencies by running the following command:
 
-            # STEP-Datei importieren
-            result = cq.importers.importStep(path)
-            print(f"Importiertes Objekt-Typ: {type(result)}")  # Debug-Ausgabe
+```bash
+pip install cadquery PyQt6 vtk
+```
 
-            # Solids extrahieren
-            all_solids = []
-            if isinstance(result, cq.Assembly):
-                all_solids = [solid for child in result.children for solid in child.obj.Solids()]
-            elif isinstance(result, cq.Workplane):
-                all_solids = result.objects if result.objects else [result.val()]
-            elif isinstance(result, (cq.Compound, cq.Shape)):
-                all_solids = [result]
-            else:
-                raise ValueError(f"Nicht unterstützter Dateityp: {type(result)}")
+If you encounter issues installing `vtk`, please check the official [VTK installation guide](https://vtk.org/download/).
 
-            if not all_solids:
-                raise ValueError("Die Datei enthält keine 3D-Körper")
+## Usage
 
-            # Mesh für jeden Solid erstellen und kombinieren
-            vertices = []
-            triangles = []
-            vertex_offset = 0
+1. **Run the Application**: Open a terminal or command prompt, navigate to the directory where the script is located, and run:
 
-            for solid in all_solids:
-                mesh = solid.tessellate(0.1)  # Tessellation mit 0.1mm Genauigkeit
-                
-                # Vertices hinzufügen
-                vertices.extend(mesh[0])
-                
-                # Dreiecke mit Offset hinzufügen
-                for triangle in mesh[1]:
-                    triangles.append([idx + vertex_offset for idx in triangle])
-                
-                vertex_offset += len(mesh[0])
+```bash
+python stp.py
+```
 
-            # VTK-Datenstruktur erstellen
-            points = vtk.vtkPoints()
-            vtk_triangles = vtk.vtkCellArray()
+2. **Load STEP File**: After launching the application, click the "STEP Datei öffnen" button to open a file dialog. Select a STEP file (.stp or .step) from your system to load it into the viewer.
 
-            # Punkte hinzufügen
-            for vertex in vertices:
-                if isinstance(vertex, tuple):
-                    points.InsertNextPoint(vertex[0], vertex[1], vertex[2])
-                else:
-                    points.InsertNextPoint(vertex.x, vertex.y, vertex.z)
+3. **View the 3D Model**: The 3D model will be displayed in the VTK viewer window. You can rotate, zoom, and pan the view using mouse controls.
 
-            # Dreiecke hinzufügen
-            for face in triangles:
-                triangle = vtk.vtkTriangle()
-                triangle.GetPointIds().SetId(0, face[0])
-                triangle.GetPointIds().SetId(1, face[1])
-                triangle.GetPointIds().SetId(2, face[2])
-                vtk_triangles.InsertNextCell(triangle)
+4. **Save Screenshot**: To save a screenshot of the rendered view, click the "Screenshot speichern" button, select the file location, and save the image as a PNG file.
 
-            # PolyData konfigurieren
-            polydata = vtk.vtkPolyData()
-            polydata.SetPoints(points)
-            polydata.SetPolys(vtk_triangles)
+## Code Overview
 
-            # Normalen berechnen
-            normals = vtk.vtkPolyDataNormals()
-            normals.SetInputData(polydata)
-            normals.ComputePointNormalsOn()
-            normals.Update()
+### Main Components:
 
-            # Mapper und Actor erstellen
-            mapper = vtkPolyDataMapper()
-            mapper.SetInputConnection(normals.GetOutputPort())
+1. **CadQuery Import**: 
+    - Used for importing the STEP file using `cq.importers.importStep()`.
+    - The STEP file is processed to extract the 3D solids for rendering.
 
-            self.current_actor = vtkActor()
-            self.current_actor.SetMapper(mapper)
-            self.current_actor.GetProperty().SetColor(0.9, 0.7, 0.2)  # Goldene Farbe
+2. **VTK Rendering**: 
+    - The 3D objects are tessellated into vertices and triangles using `cadquery`.
+    - These are then passed to VTK for rendering through the `vtkPoints` and `vtkCellArray` objects.
 
-            # Zur Szene hinzufügen
-            self.renderer.AddActor(self.current_actor)
-            self.renderer.ResetCamera()
-            self.vtk_widget.GetRenderWindow().Render()
+3. **User Interface**:
+    - Built using `PyQt6`, which provides buttons for loading files and saving screenshots.
+    - The VTK rendering window is integrated into the Qt GUI via `QVTKRenderWindowInteractor`.
 
-        except Exception as e:
-            self.show_error(f"Fehler beim Laden:\n{str(e)}")
-            import traceback
-            traceback.print_exc()
+4. **Screenshot Functionality**:
+    - A screenshot of the rendered 3D view can be captured and saved using `vtkWindowToImageFilter` and `vtkPNGWriter`.
 
-    def save_screenshot(self):
-        """Speichert einen Screenshot der aktuellen Ansicht"""
-        path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Screenshot speichern",
-            "",
-            "PNG Bilder (*.png);;Alle Dateien (*)"
-        )
-        
-        if path:
-            try:
-                # Rendering erzwingen
-                self.vtk_widget.GetRenderWindow().Render()
-                
-                # Bild erfassen
-                w2if = vtk.vtkWindowToImageFilter()
-                w2if.SetInput(self.vtk_widget.GetRenderWindow())
-                w2if.SetScale(1)
-                w2if.Update()
+## Troubleshooting
 
-                # Datei speichern
-                writer = vtk.vtkPNGWriter()
-                writer.SetFileName(path)
-                writer.SetInputConnection(w2if.GetOutputPort())
-                writer.Write()
+### Common Issues
 
-            except Exception as e:
-                self.show_error(f"Speicherfehler:\n{str(e)}")
+1. **File Not Opening**:
+    - Ensure that the file path to the STEP file is correct and that the file is not corrupted.
+    - The application supports both `.stp` and `.step` file formats.
 
-    def show_error(self, message):
-        """Zeigt eine Fehlermeldung an"""
-        msg = QMessageBox(self)
-        msg.setIcon(QMessageBox.Icon.Critical)
-        msg.setWindowTitle("Fehler")
-        msg.setText(message)
-        msg.exec()
+2. **Performance with Large Files**:
+    - Large STEP files may take longer to load due to the tessellation process. Be patient while the file is being processed and rendered.
 
-if __name__ == "__main__":
-    # HighDPI-Einstellungen für Windows
-    QApplication.setHighDpiScaleFactorRoundingPolicy(
-        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
-    )
-    
-    app = QApplication(sys.argv)
-    viewer = STEPViewer()
-    viewer.show()
-    sys.exit(app.exec())
+3. **Dependencies**:
+    - Ensure all required dependencies are installed by running the installation command. If you face any issues with `vtk` installation, refer to the [VTK installation guide](https://vtk.org/download/).
+
+## License
+
+This project is open-source and licensed under the GPL3 License. See the [LICENSE](LICENSE) file for more details.
+
+## Acknowledgements
+
+- **CadQuery**: A powerful parametric 3D CAD scripting API used for importing and working with STEP files.
+- **VTK**: A powerful 3D rendering library used for visualizing 3D models.
+- **PyQt6**: The Qt bindings for Python that help build the GUI interface.
+
+## Contact
+
+For any questions, suggestions, or issues, feel free to reach out or open an issue on GitHub.
+
+
+
