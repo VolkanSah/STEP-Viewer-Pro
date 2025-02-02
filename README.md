@@ -1,5 +1,13 @@
 # STEP Viewer Pro
-#### AI-Contest Tool
+AI-Contest Tool
+
+- Prompt: Create a viewer for 3D model rendering with screenshot capture and export. Keep in mind that Windows doesn’t always play nice with all Python libraries! Achieve this with as little code as possible.
+- Time Spent: ~3 Hours
+- Human Interventions: Code needed repairs 12 times.
+- Winner: ClaudeAI 🏆
+- Silver: ChatGPT 🥈
+- Bronze: DeepSeek 🥉
+
 
 **STEP Viewer Pro** is a lightweight 3D model viewer designed to display STEP files (ISO 10303), with a focus on providing high-quality rendering of models for screenshots. This project was developed with the goal of enabling easy viewing and capturing of STEP files in customizable angles and resolutions, and it’s offered as a gift to the open-source community.
 
