@@ -1,96 +1,78 @@
 # STEP Viewer Pro
+#### AI-Contest Tool
 
-STEP Viewer Pro is a Python-based desktop application designed for visualizing STEP (STP) files, commonly used in 3D CAD modeling. This viewer utilizes the power of VTK (Visualization Toolkit) for rendering and CadQuery for importing STEP files. The application provides an interactive interface with basic functionality for loading STEP files, visualizing them in 3D, and saving screenshots of the rendered view.
+**STEP Viewer Pro** is a lightweight 3D model viewer designed to display STEP files (ISO 10303), with a focus on providing high-quality rendering of models for screenshots. This project was developed with the goal of enabling easy viewing and capturing of STEP files in customizable angles and resolutions, and it’s offered as a gift to the open-source community.
+
+The tool was created through a collaboration between several AI models, where the development process was a competitive learning experience among the leading AI systems. In the end, **Claude** came out on top, helping to make the project a reality with its expertise. Special thanks also go to **Deepseek** and **ChatGPT**, who both contributed valuable assistance during the development process.
+
+---
 
 ## Features
 
-- **Load and View STEP Files**: Open STEP files (.stp, .step) and display them in a 3D interactive viewer.
-- **3D Visualization**: Leverage VTK for rendering the 3D geometry with dynamic interactions.
-- **Screenshot Capture**: Save a screenshot of the rendered view to your local machine.
-- **Cross-Platform**: Works on systems supporting Python and Qt.
+- **STEP File Loading**: Import and view STEP files (.stp, .step).
+- **3D Model Rendering**: Visualize your 3D models with high-quality rendering.
+- **Screenshot Capture**: Save screenshots of the rendered model in various angles and resolutions.
+- **Easy-to-use Interface**: Intuitive GUI with buttons to load files and save images.
 
-## Requirements
+---
 
-To run this project, the following Python modules must be installed:
+## Installation
 
-- `cadquery`: Used for importing and working with STEP files.
-- `PyQt6`: Provides the GUI components for the application.
-- `vtk`: The core library for 3D rendering.
-- `os`: Used for environment configuration.
-- `sys`: For system-specific parameters and functions.
+To use **STEP Viewer Pro**, you need to install the following dependencies:
 
-### Installation
+### Requirements
 
-1. Ensure that you have Python 3.7 or higher installed. You can download it from [here](https://www.python.org/downloads/).
-   
-2. Install the necessary dependencies by running the following command:
+- **Python 3.x**  
+- **PyQt6** (for the GUI)
+- **CadQuery** (for STEP file handling and tessellation)
+- **VTK** (for rendering and visualization)
+
+### Installation Steps
+
+1. Clone or download the repository.
+2. Install the required dependencies by running:
 
 ```bash
-pip install cadquery PyQt6 vtk
+pip install cadquery vtk PyQt6
 ```
 
-If you encounter issues installing `vtk`, please check the official [VTK installation guide](https://vtk.org/download/).
+---
 
 ## Usage
 
-1. **Run the Application**: Open a terminal or command prompt, navigate to the directory where the script is located, and run:
+1. **Run the Viewer**: After installing the dependencies, simply run the `step_viewer.py` script.
+2. **Open STEP File**: Click on "STEP Datei öffnen" to select and load your STEP file.
+3. **Take Screenshot**: Click on "Screenshot speichern" to save a screenshot of the rendered model.
 
-```bash
-python stp.py
-```
+---
 
-2. **Load STEP File**: After launching the application, click the "STEP Datei öffnen" button to open a file dialog. Select a STEP file (.stp or .step) from your system to load it into the viewer.
+## How It Works
 
-3. **View the 3D Model**: The 3D model will be displayed in the VTK viewer window. You can rotate, zoom, and pan the view using mouse controls.
+- **STEP File Loading**: The viewer uses **CadQuery** to import and process the STEP file into a 3D model, which is then tessellated to create a mesh for rendering.
+- **Rendering**: The model is displayed using **VTK** for efficient 3D visualization. You can interact with the model, change angles, and capture screenshots.
+- **Screenshot Capture**: The viewer allows you to take screenshots of your model at the desired angle and save them as PNG files.
 
-4. **Save Screenshot**: To save a screenshot of the rendered view, click the "Screenshot speichern" button, select the file location, and save the image as a PNG file.
+---
 
-## Code Overview
+## Contributing
 
-### Main Components:
+This project is an open-source initiative, and contributions are welcome! Whether you want to improve the UI, optimize performance, or add new features, feel free to open issues or submit pull requests.
 
-1. **CadQuery Import**: 
-    - Used for importing the STEP file using `cq.importers.importStep()`.
-    - The STEP file is processed to extract the 3D solids for rendering.
+Remember, this tool was developed with a spirit of fair collaboration and open competition between powerful AI models, making it a true team effort, with contributions from **Claude**, **Deepseek**, and **ChatGPT**.
 
-2. **VTK Rendering**: 
-    - The 3D objects are tessellated into vertices and triangles using `cadquery`.
-    - These are then passed to VTK for rendering through the `vtkPoints` and `vtkCellArray` objects.
-
-3. **User Interface**:
-    - Built using `PyQt6`, which provides buttons for loading files and saving screenshots.
-    - The VTK rendering window is integrated into the Qt GUI via `QVTKRenderWindowInteractor`.
-
-4. **Screenshot Functionality**:
-    - A screenshot of the rendered 3D view can be captured and saved using `vtkWindowToImageFilter` and `vtkPNGWriter`.
-
-## Troubleshooting
-
-### Common Issues
-
-1. **File Not Opening**:
-    - Ensure that the file path to the STEP file is correct and that the file is not corrupted.
-    - The application supports both `.stp` and `.step` file formats.
-
-2. **Performance with Large Files**:
-    - Large STEP files may take longer to load due to the tessellation process. Be patient while the file is being processed and rendered.
-
-3. **Dependencies**:
-    - Ensure all required dependencies are installed by running the installation command. If you face any issues with `vtk` installation, refer to the [VTK installation guide](https://vtk.org/download/).
+---
 
 ## License
 
-This project is open-source and licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+This project is licensed under the **MIT License**.
+
+---
 
 ## Acknowledgements
 
-- **CadQuery**: A powerful parametric 3D CAD scripting API used for importing and working with STEP files.
-- **VTK**: A powerful 3D rendering library used for visualizing 3D models.
-- **PyQt6**: The Qt bindings for Python that help build the GUI interface.
+- **Claude.ai**: For winning the AI contest and helping to make this tool a reality.
+- **Deepseek**: For the contributions and insights during the development process.
+- **ChatGPT**: For contributing to the project and assisting in resolving technical challenges.
+- **PyQt6, CadQuery, and VTK**: For the excellent libraries that powered the viewer.
 
-## Contact
-
-For any questions, suggestions, or issues, feel free to reach out or open an issue on GitHub.
-
-
-
+Enjoy using **STEP Viewer Pro**—a gift to the open-source community from us!
