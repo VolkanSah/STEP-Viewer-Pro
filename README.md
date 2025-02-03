@@ -86,7 +86,7 @@ This project is licensed under the **MIT License**.
 
 Enjoy using **STEP Viewer Pro**—a gift to the open-source community from us!
 
-## Basic Idea i give them.
+### Basic Idea i give them.
 
 ```
 from OCC.Core.STEPControl import STEPControl_Reader
