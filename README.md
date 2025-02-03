@@ -5,8 +5,8 @@ AI-Contest Tool
 - Time Spent: ~3 Hours
 - Human Interventions: Code needed repairs 12 times.
 - Winner: ClaudeAI 🏆 Fix Errors but eat code!
-- Silver: ChatGPT 🥈 80 % of code! 
-- Bronze: DeepSeek 🥉 give small ideas but break code!
+- Silver: ChatGPT 🥈 80 % of code! But think to komplex!
+- Bronze: DeepSeek 🥉 gives to komplex ideas and break code!
 
 ---
 
