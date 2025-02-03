@@ -85,3 +85,31 @@ This project is licensed under the **MIT License**.
 - **PyQt6, CadQuery, and VTK**: For the excellent libraries that powered the viewer.
 
 Enjoy using **STEP Viewer Pro**—a gift to the open-source community from us!
+
+## Basic Idea i give them.
+
+```
+from OCC.Core.STEPControl import STEPControl_Reader
+from OCC.Display.SimpleGui import init_display
+from OCC.Core.BRepTools import breptools_Write
+
+# Datei einlesen
+step_reader = STEPControl_Reader()
+status = step_reader.ReadFile("deine_datei.stp")
+
+if status == 1:  # 1 bedeutet Erfolg
+    step_reader.TransferRoot()
+    shape = step_reader.OneShape()
+
+    # 3D-Viewer starten
+    display, start_display, add_menu, add_function_to_menu = init_display()
+    display.DisplayShape(shape, update=True)
+    
+    # Screenshot speichern
+    display.View.Dump("preview.png")
+    
+    start_display()
+else:
+    print("Fehler: Datei konnte nicht geladen werden.")
+```
+
