@@ -1,7 +1,7 @@
 # STEP Viewer Pro
 AI-Contest Tool
 
-- Prompt: Create a viewer for 3D model rendering with screenshot capture and export. Keep in mind that Windows doesn’t always play nice with all Python libraries! Achieve this with as little code as possible.
+- Prompt: Create a .stp, .step files viewer for 3D model rendering with screenshot capture and export. Keep in mind that Windows doesn’t always play nice with all Python libraries! Achieve this with as little code as possible. Note: I want capture diffrent position of the laded model!
 - Time Spent: ~3 Hours
 - Human Interventions: Code needed repairs 12 times.
 - Winner: ClaudeAI 🏆
