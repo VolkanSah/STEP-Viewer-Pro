@@ -3,7 +3,7 @@
 
 #### AI-Contest Tool (Created as a test because there's no real testing on social networks – only scam content!)
 
-- **Prompt**: Create a .stp, .step file viewer for 3D model rendering with screenshot capture and export. Keep in mind that Windows doesn’t always play nice with all Python libraries! Achieve this with minimal code. Note: I need to capture the model from different angles!
+- **Basic-Prompt**: Create a .stp, .step file viewer for 3D model rendering with screenshot capture and export. Keep in mind that Windows doesn’t always play nice with all Python libraries! Achieve this with minimal code. Note: I need to capture the model from different angles!
 - **Time Spent**: ~3 Hours
 - **Human Interventions**: Code needed fixes 12 times.
 - **Winner**: **ClaudeAI** 🏆 - Fixed errors but embraced the code!
