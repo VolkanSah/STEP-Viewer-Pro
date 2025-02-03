@@ -1,3 +1,4 @@
+# STEP Viewer Pro - Created By AI with help by a Human (me)
 import sys
 import os
 import cadquery as cq
