@@ -6,7 +6,7 @@
 - **Basic-Prompt**: Create a .stp, .step file viewer for 3D model rendering with screenshot capture and export. Keep in mind that Windows doesn’t always play nice with all Python libraries! Achieve this with minimal code. Note: I need to capture the model from different angles!
 - **Time Spent**: ~3 Hours
 - **Human Interventions**: Code needed fixes 12 times.
-- **Winner**: **ClaudeAI** 🏆 - Fixed errors but embraced the code!
+- **Winner**: **ClaudeAI** 🏆 - Fixed errors but embraced the code! (Understands Error-Logs better)
 - **Silver**: **ChatGPT** 🥈 - 80% of the code! But overcomplicated things!
 - **Bronze**: **DeepSeek** 🥉 - Gave overly complex ideas, which broke the code!
 
