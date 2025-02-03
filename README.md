@@ -1,5 +1,5 @@
 
-# STEP Viewer Pro
+# STEP Viewer Pro (ISO 10303)
 
 #### AI-Contest Tool (Created as a test because there's no real testing on social networks – only scam content!)
 
