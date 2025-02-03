@@ -1,18 +1,21 @@
-# STEP Viewer Pro
-AI-Contest Tool
 
-- Prompt: Create a .stp, .step files viewer for 3D model rendering with screenshot capture and export. Keep in mind that Windows doesn’t always play nice with all Python libraries! Achieve this with as little code as possible. Note: I want capture diffrent position of the laded model!
-- Time Spent: ~3 Hours
-- Human Interventions: Code needed repairs 12 times.
-- Winner: ClaudeAI 🏆 Fix Errors but eat code!
-- Silver: ChatGPT 🥈 80 % of code! But think to komplex!
-- Bronze: DeepSeek 🥉 gives to komplex ideas and break code!
+# STEP Viewer Pro
+
+#### AI-Contest Tool (Created as a test because there's no real testing on social networks – only scam content!)
+
+- **Prompt**: Create a .stp, .step file viewer for 3D model rendering with screenshot capture and export. Keep in mind that Windows doesn’t always play nice with all Python libraries! Achieve this with minimal code. Note: I need to capture the model from different angles!
+- **Time Spent**: ~3 Hours
+- **Human Interventions**: Code needed fixes 12 times.
+- **Winner**: **ClaudeAI** 🏆 - Fixed errors but embraced the code!
+- **Silver**: **ChatGPT** 🥈 - 80% of the code! But overcomplicated things!
+- **Bronze**: **DeepSeek** 🥉 - Gave overly complex ideas, which broke the code!
 
 ---
 
-**STEP Viewer Pro** is a lightweight 3D model viewer designed to display STEP files (ISO 10303), with a focus on providing high-quality rendering of models for screenshots. This project was developed with the goal of enabling easy viewing and capturing of STEP files in customizable angles and resolutions, and it’s offered as a gift to the open-source community.
+**STEP Viewer Pro** is a lightweight 3D model viewer designed to display STEP files (ISO 10303), focused on high-quality rendering of models for easy screenshot capture and export. It allows users to view STEP files from customizable angles and resolutions, making it perfect for anyone who needs to capture models for presentations, reviews, or documentation.
 
-The tool was created through a collaboration between several AI models, where the development process was a competitive learning experience among the leading AI systems. In the end, **Claude** came out on top, helping to make the project a reality with its expertise. Special thanks also go to **Deepseek** and **ChatGPT**, who both contributed valuable assistance during the development process.
+This project was created through a competitive collaboration between several leading AI systems, testing their capabilities and learning from real-world development scenarios. **ClaudeAI** emerged as the winner, offering valuable fixes and optimizing the code to bring the project to life. Special thanks also go to **DeepSeek** and **ChatGPT**, who contributed meaningful insights during the process, though their approaches were sometimes more complex than needed.
+
 
 ---
 
