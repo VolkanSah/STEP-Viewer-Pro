@@ -89,7 +89,7 @@ This project is licensed under the **MIT License**.
 
 Enjoy using **STEP Viewer Pro**—a gift to the open-source community from us!
 
-### Basic Idea i give them.
+### Basic Idea for Ais 
 
 ```
 from OCC.Core.STEPControl import STEPControl_Reader
@@ -115,4 +115,8 @@ if status == 1:  # 1 bedeutet Erfolg
 else:
     print("Fehler: Datei konnte nicht geladen werden.")
 ```
+
+### Screenshot
+![STEP-VIEWER-PRO](step.jpg)
+
 
