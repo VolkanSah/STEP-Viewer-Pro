@@ -1,78 +1,71 @@
-# STEP Viewer Pro - Created By AI with help by a Human (me)
 import sys
 import os
+from pathlib import Path
 import cadquery as cq
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, QFileDialog, QMessageBox
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
+                              QPushButton, QFileDialog, QMessageBox, QProgressDialog, 
+                              QComboBox, QLabel, QHBoxLayout)
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper, vtkRenderer
 import vtk
 
-os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"  # HighDPI-Fix für Windows
+os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
 
-class STEPViewer(QMainWindow):
-    def __init__(self):
+# Sprachdaten
+TRANSLATIONS = {
+    "de": {
+        "title": "STEP Viewer Pro",
+        "btn_load": "STEP Datei öffnen",
+        "btn_save": "Screenshot speichern",
+        "language": "Sprache",
+        "select_file": "STEP-Datei auswählen",
+        "step_files": "STEP Files (*.stp *.step);;Alle Dateien (*)",
+        "save_screenshot": "Screenshot speichern",
+        "png_files": "PNG Bilder (*.png);;Alle Dateien (*)",
+        "error": "Fehler",
+        "loading": "Lade STEP-Datei...",
+        "processing": "Verarbeite 3D-Daten...",
+        "load_error": "Fehler beim Laden",
+        "save_error": "Speicherfehler",
+        "no_solids": "Die Datei enthält keine 3D-Körper",
+        "unsupported": "Nicht unterstützter Dateityp"
+    },
+    "en": {
+        "title": "STEP Viewer Pro",
+        "btn_load": "Open STEP File",
+        "btn_save": "Save Screenshot",
+        "language": "Language",
+        "select_file": "Select STEP File",
+        "step_files": "STEP Files (*.stp *.step);;All Files (*)",
+        "save_screenshot": "Save Screenshot",
+        "png_files": "PNG Images (*.png);;All Files (*)",
+        "error": "Error",
+        "loading": "Loading STEP file...",
+        "processing": "Processing 3D data...",
+        "load_error": "Error loading file",
+        "save_error": "Error saving file",
+        "no_solids": "File contains no 3D bodies",
+        "unsupported": "Unsupported file type"
+    }
+}
+
+class LoaderThread(QThread):
+    """Thread für asynchrones Laden von STEP-Dateien"""
+    finished = pyqtSignal(object)
+    error = pyqtSignal(str)
+    progress = pyqtSignal(str)
+    
+    def __init__(self, path):
         super().__init__()
-        self.current_actor = None
-        self.init_ui()
+        self.path = path
         
-    def init_ui(self):
-        """Initialisiert die Benutzeroberfläche"""
-        self.setWindowTitle("STEP Viewer Pro")
-        self.setGeometry(100, 100, 1024, 768)
-
-        # VTK Widget
-        self.vtk_widget = QVTKRenderWindowInteractor(self)
-        self.renderer = vtkRenderer()
-        self.vtk_widget.GetRenderWindow().AddRenderer(self.renderer)
-        self.renderer.SetBackground(0.15, 0.15, 0.15)  # Dunkler Hintergrund
-
-        # Steuerungselemente
-        control_widget = QWidget()
-        layout = QVBoxLayout(control_widget)
-        
-        btn_load = QPushButton("STEP Datei öffnen")
-        btn_load.clicked.connect(self.load_step)
-        layout.addWidget(btn_load)
-        
-        btn_save = QPushButton("Screenshot speichern")
-        btn_save.clicked.connect(self.save_screenshot)
-        layout.addWidget(btn_save)
-
-        # Haupt-Layout
-        central_widget = QWidget()
-        main_layout = QVBoxLayout(central_widget)
-        main_layout.addWidget(self.vtk_widget)
-        main_layout.addWidget(control_widget)
-        
-        self.setCentralWidget(central_widget)
-
-        # VTK initialisieren
-        self.vtk_widget.Initialize()
-        self.vtk_widget.Start()
-
-    def load_step(self):
-        """Lädt und zeigt eine STEP-Datei an"""
-        path, _ = QFileDialog.getOpenFileName(
-            self,
-            "STEP-Datei auswählen",
-            "",
-            "STEP Files (*.stp *.step);;Alle Dateien (*)"
-        )
-        
-        if not path:
-            return
-
+    def run(self):
         try:
-            # Alte Darstellung entfernen
-            if self.current_actor:
-                self.renderer.RemoveActor(self.current_actor)
-                self.current_actor = None
-
-            # STEP-Datei importieren
-            result = cq.importers.importStep(path)
-            print(f"Importiertes Objekt-Typ: {type(result)}")  # Debug-Ausgabe
-
+            self.progress.emit("loading")
+            result = cq.importers.importStep(self.path)
+            
+            self.progress.emit("processing")
             # Solids extrahieren
             all_solids = []
             if isinstance(result, cq.Assembly):
@@ -82,115 +75,230 @@ class STEPViewer(QMainWindow):
             elif isinstance(result, (cq.Compound, cq.Shape)):
                 all_solids = [result]
             else:
-                raise ValueError(f"Nicht unterstützter Dateityp: {type(result)}")
-
+                self.error.emit(f"unsupported:{type(result)}")
+                return
+                
             if not all_solids:
-                raise ValueError("Die Datei enthält keine 3D-Körper")
-
-            # Mesh für jeden Solid erstellen und kombinieren
+                self.error.emit("no_solids")
+                return
+                
+            # Mesh kombinieren
             vertices = []
             triangles = []
             vertex_offset = 0
-
+            
             for solid in all_solids:
-                mesh = solid.tessellate(0.1)  # Tessellation mit 0.1mm Genauigkeit
-                
-                # Vertices hinzufügen
+                mesh = solid.tessellate(0.1)
                 vertices.extend(mesh[0])
                 
-                # Dreiecke mit Offset hinzufügen
                 for triangle in mesh[1]:
                     triangles.append([idx + vertex_offset for idx in triangle])
-                
                 vertex_offset += len(mesh[0])
+                
+            self.finished.emit((vertices, triangles))
+            
+        except Exception as e:
+            self.error.emit(str(e))
 
+class STEPViewer(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.current_actor = None
+        self.loader_thread = None
+        self.lang = "de"  # Default
+        self.init_ui()
+        
+    def tr(self, key):
+        """Übersetzungs-Helfer"""
+        return TRANSLATIONS[self.lang].get(key, key)
+        
+    def init_ui(self):
+        """Initialisiert die Benutzeroberfläche"""
+        self.setWindowTitle(self.tr("title"))
+        self.setGeometry(100, 100, 1024, 768)
+
+        # VTK Widget
+        self.vtk_widget = QVTKRenderWindowInteractor(self)
+        self.renderer = vtkRenderer()
+        self.vtk_widget.GetRenderWindow().AddRenderer(self.renderer)
+        self.renderer.SetBackground(0.15, 0.15, 0.15)
+
+        # Steuerungselemente
+        control_widget = QWidget()
+        layout = QVBoxLayout(control_widget)
+        
+        # Sprach-Selektor
+        lang_layout = QHBoxLayout()
+        lang_label = QLabel()
+        self.lang_label = lang_label
+        self.lang_combo = QComboBox()
+        self.lang_combo.addItems(["Deutsch", "English"])
+        self.lang_combo.currentIndexChanged.connect(self.change_language)
+        lang_layout.addWidget(lang_label)
+        lang_layout.addWidget(self.lang_combo)
+        lang_layout.addStretch()
+        layout.addLayout(lang_layout)
+        
+        self.btn_load = QPushButton()
+        self.btn_load.clicked.connect(self.load_step)
+        layout.addWidget(self.btn_load)
+        
+        self.btn_save = QPushButton()
+        self.btn_save.clicked.connect(self.save_screenshot)
+        layout.addWidget(self.btn_save)
+
+        # Haupt-Layout
+        central_widget = QWidget()
+        main_layout = QVBoxLayout(central_widget)
+        main_layout.addWidget(self.vtk_widget)
+        main_layout.addWidget(control_widget)
+        
+        self.setCentralWidget(central_widget)
+        self.update_ui_texts()
+
+        # VTK initialisieren
+        self.vtk_widget.Initialize()
+        self.vtk_widget.Start()
+        
+    def update_ui_texts(self):
+        """Aktualisiert alle UI-Texte"""
+        self.setWindowTitle(self.tr("title"))
+        self.lang_label.setText(self.tr("language") + ":")
+        self.btn_load.setText(self.tr("btn_load"))
+        self.btn_save.setText(self.tr("btn_save"))
+        
+    def change_language(self, idx):
+        """Wechselt die Sprache"""
+        self.lang = "de" if idx == 0 else "en"
+        self.update_ui_texts()
+
+    def load_step(self):
+        """Lädt und zeigt eine STEP-Datei an (asynchron)"""
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            self.tr("select_file"),
+            "",
+            self.tr("step_files")
+        )
+        
+        if not path:
+            return
+            
+        # Progress Dialog
+        self.progress = QProgressDialog(self.tr("loading"), "", 0, 0, self)
+        self.progress.setWindowModality(Qt.WindowModality.WindowModal)
+        self.progress.setCancelButton(None)
+        self.progress.show()
+        
+        # Thread starten
+        self.loader_thread = LoaderThread(path)
+        self.loader_thread.finished.connect(self.on_load_finished)
+        self.loader_thread.error.connect(self.on_load_error)
+        self.loader_thread.progress.connect(self.on_load_progress)
+        self.loader_thread.start()
+        
+    def on_load_progress(self, status):
+        """Update Progress"""
+        self.progress.setLabelText(self.tr(status))
+        
+    def on_load_finished(self, data):
+        """Callback nach erfolgreichem Laden"""
+        self.progress.close()
+        vertices, triangles = data
+        
+        try:
+            # Alte Darstellung entfernen
+            if self.current_actor:
+                self.renderer.RemoveActor(self.current_actor)
+                
             # VTK-Datenstruktur erstellen
             points = vtk.vtkPoints()
             vtk_triangles = vtk.vtkCellArray()
-
-            # Punkte hinzufügen
+            
             for vertex in vertices:
                 if isinstance(vertex, tuple):
                     points.InsertNextPoint(vertex[0], vertex[1], vertex[2])
                 else:
                     points.InsertNextPoint(vertex.x, vertex.y, vertex.z)
-
-            # Dreiecke hinzufügen
+                    
             for face in triangles:
                 triangle = vtk.vtkTriangle()
                 triangle.GetPointIds().SetId(0, face[0])
                 triangle.GetPointIds().SetId(1, face[1])
                 triangle.GetPointIds().SetId(2, face[2])
                 vtk_triangles.InsertNextCell(triangle)
-
-            # PolyData konfigurieren
+                
             polydata = vtk.vtkPolyData()
             polydata.SetPoints(points)
             polydata.SetPolys(vtk_triangles)
-
+            
             # Normalen berechnen
             normals = vtk.vtkPolyDataNormals()
             normals.SetInputData(polydata)
             normals.ComputePointNormalsOn()
             normals.Update()
-
-            # Mapper und Actor erstellen
+            
+            # Mapper und Actor
             mapper = vtkPolyDataMapper()
             mapper.SetInputConnection(normals.GetOutputPort())
-
+            
             self.current_actor = vtkActor()
             self.current_actor.SetMapper(mapper)
-            self.current_actor.GetProperty().SetColor(0.9, 0.7, 0.2)  # Goldene Farbe
-
-            # Zur Szene hinzufügen
+            self.current_actor.GetProperty().SetColor(0.9, 0.7, 0.2)
+            
             self.renderer.AddActor(self.current_actor)
             self.renderer.ResetCamera()
             self.vtk_widget.GetRenderWindow().Render()
-
+            
         except Exception as e:
-            self.show_error(f"Fehler beim Laden:\n{str(e)}")
-            import traceback
-            traceback.print_exc()
+            self.show_error(f"{self.tr('load_error')}:\n{str(e)}")
+            
+    def on_load_error(self, error):
+        """Callback bei Ladefehler"""
+        self.progress.close()
+        if error.startswith("unsupported:"):
+            msg = f"{self.tr('unsupported')}: {error.split(':')[1]}"
+        elif error == "no_solids":
+            msg = self.tr("no_solids")
+        else:
+            msg = f"{self.tr('load_error')}:\n{error}"
+        self.show_error(msg)
 
     def save_screenshot(self):
-        """Speichert einen Screenshot der aktuellen Ansicht"""
+        """Speichert einen Screenshot"""
         path, _ = QFileDialog.getSaveFileName(
             self,
-            "Screenshot speichern",
+            self.tr("save_screenshot"),
             "",
-            "PNG Bilder (*.png);;Alle Dateien (*)"
+            self.tr("png_files")
         )
         
         if path:
             try:
-                # Rendering erzwingen
                 self.vtk_widget.GetRenderWindow().Render()
                 
-                # Bild erfassen
                 w2if = vtk.vtkWindowToImageFilter()
                 w2if.SetInput(self.vtk_widget.GetRenderWindow())
                 w2if.SetScale(1)
                 w2if.Update()
 
-                # Datei speichern
                 writer = vtk.vtkPNGWriter()
                 writer.SetFileName(path)
                 writer.SetInputConnection(w2if.GetOutputPort())
                 writer.Write()
-
+                
             except Exception as e:
-                self.show_error(f"Speicherfehler:\n{str(e)}")
+                self.show_error(f"{self.tr('save_error')}:\n{str(e)}")
 
     def show_error(self, message):
-        """Zeigt eine Fehlermeldung an"""
+        """Zeigt Fehlermeldung"""
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Icon.Critical)
-        msg.setWindowTitle("Fehler")
+        msg.setWindowTitle(self.tr("error"))
         msg.setText(message)
         msg.exec()
 
 if __name__ == "__main__":
-    # HighDPI-Einstellungen für Windows
     QApplication.setHighDpiScaleFactorRoundingPolicy(
         Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
     )
