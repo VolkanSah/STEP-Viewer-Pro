@@ -212,11 +212,7 @@ else:
 
 ---
 
-## Known Issues & Roadmap
-
-### Known Issues
-- Very large files (50MB+) may still take time on first load (limitation of CadQuery tessellation)
-- Cache grows over time - remember to clear periodically
+Readme.md crafted by Gemini 2.5 Flash
 
 
 **Made with ❤️ and AI collaboration | Claude remains undefeated! 🏆🏆**
